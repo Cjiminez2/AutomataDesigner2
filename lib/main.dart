@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "node.dart";
 
 void main() {
   runApp(const MyApp());
@@ -17,16 +18,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MovableNodeScreen extends StatefulWidget {
-  MovableNodeScreen({
-    super.key
-  });
-
-  List<String> nodesWords = [];
-  List<MovableNode> nodes = [];
-  List<String> nodesIndex = [];
-  List<List<double>> positions = [];
-  List<bool> select = [];
-
+  const MovableNodeScreen({super.key});
 
   @override
   State<MovableNodeScreen> createState() => _MovableNodeScreenState();
@@ -34,7 +26,13 @@ class MovableNodeScreen extends StatefulWidget {
 
 class _MovableNodeScreenState extends State<MovableNodeScreen> {
 
-  //late List<Widget> nodes = [];
+  void _reset() {
+    setState(() {
+      nodes = [];
+    });
+  }
+
+  List<Node> nodes = [];
   @override
   Widget build(BuildContext context) {
     //Might be needed for screen size
@@ -42,149 +40,42 @@ class _MovableNodeScreenState extends State<MovableNodeScreen> {
     //double screen_height = MediaQuery.of(context).size.height;  // Screen height
     return Scaffold(
       appBar: AppBar(
-        title: const Text("MovableNode"),
+        title: const Text("Autamata Designer"),
       ),
       body: Stack(
         children: [
           GestureDetector(
-              onDoubleTapDown: (details) {
+            //Add node on double tap
+            onDoubleTapDown: (details) {
+              setState(() {
                 var position = details.localPosition;
-                widget.nodes.add(
-                  MovableNode(
-                    top: position.dy-50,
-                    left: position.dx-50
+                nodes.add(
+                  Node(
+                      //-50 is for the center of the cursor
+                      top: position.dy-50,
+                      left: position.dx-50
                   )
                 );
-                setState(() {});
-              }
+              });
+            },
+            onLongPress: () => _reset(),
           ),
           Stack(
-            children: widget.nodes,
+            children: nodes,
           ),
+          /*
+          TODO:
+          Rework this to be toggles on
+          by a floating point button.
+          Useless as of current
+           */
           IgnorePointer(
             ignoring: true,
-            child:
-              GestureDetector(
-                onTapDown: (details) {
-                  var position = details.localPosition;
-                  var x = position.dx;
-                  var y = position.dy;
-                  for (int i = 0; i < widget.nodesWords.length; i++) {
-                    if ((widget.positions[i][0] - y).abs() < 50 &&
-                        ((widget.positions[i][1] - x).abs() < 50)) {
-                      widget.select[i] = !widget.select[i];
-                    }
-                  }
-                  setState(() {});
-                  //print("tapped");
-                }
-              ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class MovableNode extends StatefulWidget {
-  final double top;
-  final double left;
-  late bool selected = true;
-
-  MovableNode({
-    super.key,
-    required this.top,
-    required this.left
-  });
-
-  void unselect() {
-    selected = false;
-  }
-
-  void select() {
-    selected = true;
-  }
-
-  @override
-  State<MovableNode> createState() => _MovableNodeState();
-}
-
-class _MovableNodeState extends State<MovableNode> {
-  late double top = widget.top;
-  late double left = widget.left;
-  final focusNode = FocusNode();
-  late Color borderColor = Colors.black;
-
-  void enabler() {
-    borderColor = Colors.lightBlueAccent;
-    focusNode.requestFocus();
-    setState(() {});
-  }
-
-  void disable() {
-    borderColor = Colors.black;
-    focusNode.unfocus();
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    focusNode.dispose();
-    super.dispose();
-  }
-
-  List<double> getPosition () {
-    return [top, left];
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    enabler();
-    focusNode.addListener(_loseFocus);
-  }
-
-  void _loseFocus() {
-    if (!focusNode.hasFocus) {
-      disable();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: top,
-      left: left,
-      child: GestureDetector(
-        onPanUpdate: (details) {
-          setState(() {
-            top += details.delta.dy;
-            left += details.delta.dx;
-          });
-        },
-        child: Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            border: Border.all(
-              color: borderColor,
-              width: 4.0,
+            child: GestureDetector(
+              //TODO: Implement Line Drawing
             ),
           ),
-
-          child: Center(
-            child: TextField(
-              focusNode: focusNode,
-              onEditingComplete: () => disable(),
-              onTapOutside: (PointerDownEvent event) => disable(),
-              onTap: () => enabler(),
-              decoration: const InputDecoration(labelText: "Type")
-            )
-          ),
-
-        ),
+        ],
       ),
     );
   }
