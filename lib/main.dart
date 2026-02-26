@@ -11,111 +11,180 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MovableNodeScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class MovableNodeScreen extends StatefulWidget {
+  MovableNodeScreen({
+    super.key
+  });
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+  List<String> nodesWords = [];
+  List<MovableNode> nodes = [];
+  List<String> nodesIndex = [];
+  List<List<double>> positions = [];
+  List<bool> select = [];
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MovableNodeScreen> createState() => _MovableNodeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MovableNodeScreenState extends State<MovableNodeScreen> {
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  //late List<Widget> nodes = [];
+  @override
+  Widget build(BuildContext context) {
+    //Might be needed for screen size
+    //double screen_width = MediaQuery.of(context).size.width;    // Screen width
+    //double screen_height = MediaQuery.of(context).size.height;  // Screen height
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("MovableNode"),
+      ),
+      body: Stack(
+        children: [
+          GestureDetector(
+              onDoubleTapDown: (details) {
+                var position = details.localPosition;
+                widget.nodes.add(
+                  MovableNode(
+                    top: position.dy-50,
+                    left: position.dx-50
+                  )
+                );
+                setState(() {});
+              }
+          ),
+          Stack(
+            children: widget.nodes,
+          ),
+          IgnorePointer(
+            ignoring: true,
+            child:
+              GestureDetector(
+                onTapDown: (details) {
+                  var position = details.localPosition;
+                  var x = position.dx;
+                  var y = position.dy;
+                  for (int i = 0; i < widget.nodesWords.length; i++) {
+                    if ((widget.positions[i][0] - y).abs() < 50 &&
+                        ((widget.positions[i][1] - x).abs() < 50)) {
+                      widget.select[i] = !widget.select[i];
+                    }
+                  }
+                  setState(() {});
+                  //print("tapped");
+                }
+              ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MovableNode extends StatefulWidget {
+  final double top;
+  final double left;
+  late bool selected = true;
+
+  MovableNode({
+    super.key,
+    required this.top,
+    required this.left
+  });
+
+  void unselect() {
+    selected = false;
+  }
+
+  void select() {
+    selected = true;
+  }
+
+  @override
+  State<MovableNode> createState() => _MovableNodeState();
+}
+
+class _MovableNodeState extends State<MovableNode> {
+  late double top = widget.top;
+  late double left = widget.left;
+  final focusNode = FocusNode();
+  late Color borderColor = Colors.black;
+
+  void enabler() {
+    borderColor = Colors.lightBlueAccent;
+    focusNode.requestFocus();
+    setState(() {});
+  }
+
+  void disable() {
+    borderColor = Colors.black;
+    focusNode.unfocus();
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  List<double> getPosition () {
+    return [top, left];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    enabler();
+    focusNode.addListener(_loseFocus);
+  }
+
+  void _loseFocus() {
+    if (!focusNode.hasFocus) {
+      disable();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+    return Positioned(
+      top: top,
+      left: left,
+      child: GestureDetector(
+        onPanUpdate: (details) {
+          setState(() {
+            top += details.delta.dy;
+            left += details.delta.dx;
+          });
+        },
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            border: Border.all(
+              color: borderColor,
+              width: 4.0,
             ),
-          ],
+          ),
+
+          child: Center(
+            child: TextField(
+              focusNode: focusNode,
+              onEditingComplete: () => disable(),
+              onTapOutside: (PointerDownEvent event) => disable(),
+              onTap: () => enabler(),
+              decoration: const InputDecoration(labelText: "Type")
+            )
+          ),
+
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
