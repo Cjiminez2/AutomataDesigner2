@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import "dart:math";
 
-//ignore must_be_immutable
+//ignore: must_be_immutable
 class Node extends StatefulWidget {
   late double top;
   late double left;
@@ -11,6 +12,22 @@ class Node extends StatefulWidget {
     required this.left
   });
 
+  double getX() {
+    return left;
+  }
+
+  double getY() {
+    return top;
+  }
+
+  bool containsPoint(double x, double y) {
+    if (pow(x - left, 2) + pow(y - top, 2) < pow(50, 2)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   @override
   State<Node> createState() => _NodeState();
 }
@@ -19,7 +36,7 @@ class _NodeState extends State<Node> {
   //late double top = widget.top;
   //late double left = widget.left;
   late Color borderColor = Colors.black;
-  final focusNode = FocusNode();
+  final FocusNode focusNode = FocusNode();
 
   //Changes the appearance for selected nodes
   void _enabler() {
@@ -66,62 +83,53 @@ class _NodeState extends State<Node> {
     return Positioned(
       top: widget.top,
       left: widget.left,
-      child: GestureDetector(
-        onPanUpdate: (details) {
-          setState(() {
-            widget.top += details.delta.dy;
-            widget.left += details.delta.dx;
-          });
-        },
-
-        child: Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            border: Border.all(
-              color: borderColor,
-              width: 4.0,
-            ),
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          border: Border.all(
+            color: borderColor,
+            width: 4.0,
           ),
-          child: Stack(
-            children: [
-              Center(
-                child: TextField(
-                  style:
-                  TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 30,
-                      color: borderColor),
-                  textAlign: TextAlign.center,
-                  focusNode: focusNode,
-                  onEditingComplete: () => _disabler(),
-                  onTapOutside: (PointerDownEvent event) => _disabler(),
-                  onTap: () => _enabler(),
-                  decoration: null, //Removes textfield designs
-                ),
+        ),
+        child: Stack(
+          children: [
+            Center(
+              child: TextField(
+                style:
+                TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 30,
+                    color: borderColor),
+                textAlign: TextAlign.center,
+                focusNode: focusNode,
+                onEditingComplete: () => _disabler(),
+                onTapOutside: (PointerDownEvent event) => _disabler(),
+                onTap: () => _enabler(),
+                decoration: null, //Removes text-field designs
               ),
-              //Accept state extra circle
-              Center(
-                  child: Visibility(
-                    visible: false, //TODO: add accept state toggelability
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: borderColor,
-                          width: 4.0,
-                        ),
+            ),
+            //Accept state extra circle
+            Center(
+                child: Visibility(
+                  visible: false, //TODO: add accept state toggle
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: borderColor,
+                        width: 4.0,
                       ),
                     ),
-                  )
-              ),
-            ],
-          ),
+                  ),
+                )
+            ),
+          ],
         ),
       ),
     );
