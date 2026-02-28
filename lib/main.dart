@@ -50,11 +50,11 @@ class _MovableNodeScreenState extends State<MovableNodeScreen> {
               setState(() {
                 var position = details.localPosition;
                 nodes.add(
-                  Node(
+                    Node(
                       //-50 is for the center of the cursor
-                      top: position.dy-50,
-                      left: position.dx-50
-                  )
+                        top: position.dy-50,
+                        left: position.dx-50
+                    )
                 );
               });
             },

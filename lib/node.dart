@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+//ignore must_be_immutable
 class Node extends StatefulWidget {
-  final double top;
-  final double left;
+  late double top;
+  late double left;
 
-  const Node({
+  Node({
     super.key,
     required this.top,
     required this.left
@@ -15,8 +16,8 @@ class Node extends StatefulWidget {
 }
 
 class _NodeState extends State<Node> {
-  late double top = widget.top;
-  late double left = widget.left;
+  //late double top = widget.top;
+  //late double left = widget.left;
   late Color borderColor = Colors.black;
   final focusNode = FocusNode();
 
@@ -43,9 +44,9 @@ class _NodeState extends State<Node> {
   }
 
   //TODO: Make this useful later
-  List<double> getPosition () {
-    return [top, left];
-  }
+  //List<double> getPosition () {
+  //  return [top, left];
+  //}
 
   @override
   void initState() {
@@ -63,13 +64,13 @@ class _NodeState extends State<Node> {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: top,
-      left: left,
+      top: widget.top,
+      left: widget.left,
       child: GestureDetector(
         onPanUpdate: (details) {
           setState(() {
-            top += details.delta.dy;
-            left += details.delta.dx;
+            widget.top += details.delta.dy;
+            widget.left += details.delta.dx;
           });
         },
 
