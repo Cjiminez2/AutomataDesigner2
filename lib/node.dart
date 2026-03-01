@@ -1,24 +1,15 @@
 import 'package:flutter/material.dart';
 import "dart:math";
 
-//ignore: must_be_immutable
 class Node extends StatefulWidget {
-  late double top;
-  late double left;
+  final double top;
+  final double left;
 
-  Node({
+  const Node({
     super.key,
     required this.top,
     required this.left
   });
-
-  double getX() {
-    return left;
-  }
-
-  double getY() {
-    return top;
-  }
 
   bool containsPoint(double x, double y) {
     if (pow(x - left, 2) + pow(y - top, 2) < pow(50, 2)) {
