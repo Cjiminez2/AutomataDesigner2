@@ -27,6 +27,7 @@ class MovableNodeScreen extends StatefulWidget {
 
 class _MovableNodeScreenState extends State<MovableNodeScreen> {
 
+  //Resets the screen to blank
   void _reset() {
     setState(() {
       positions = [];
@@ -40,25 +41,29 @@ class _MovableNodeScreenState extends State<MovableNodeScreen> {
   List<CustomPaint> lines = [];
   List<List<int>> lineIndices = [];
 
-  //List<Widget> nodesAndLines = [];
-
+  //Creates lists to display nodes and lines as children in stack
   void _buildScreen() {
     nodes = [];
     lines = [];
     for (int i = 0; i < positions.length; i++) {
-      nodes.add(Node(left: positions[i][0], top: positions[i][1]));
+      nodes.add(Node(position: Offset(positions[i][0], positions[i][1])));
     }
 
     for (int i = 0; i < lineIndices.length; i++) {
       lines.add(
         CustomPaint(
+
           painter: Line(
-            topA: positions[lineIndices[i][0]][1] + 50,
-            topB: positions[lineIndices[i][1]][1] + 50,
-            leftA: positions[lineIndices[i][0]][0] + 50,
-            leftB: positions[lineIndices[i][1]][0] + 50,
+            nodeA: Offset(
+              positions[lineIndices[i][0]][0] + 50,
+              positions[lineIndices[i][0]][1] + 50,
+            ),
+            nodeB: Offset(
+              positions[lineIndices[i][1]][0] + 50,
+              positions[lineIndices[i][1]][1] + 50,
+            ),
           ),
-        )
+        ),
       );
     }
   }
@@ -76,6 +81,18 @@ class _MovableNodeScreenState extends State<MovableNodeScreen> {
   void toggleLineMode() {
     lineMode = !lineMode;
     setState(() {});
+  }
+
+  //Returns the index of a given node
+  int _selectIndex(Offset position) {
+    double y = position.dy - 50;
+    double x = position.dx - 50;
+    for (int i = 0; i < positions.length; i++) {
+      if (nodes[i].containsPoint(x, y)) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   @override
@@ -97,7 +114,7 @@ class _MovableNodeScreenState extends State<MovableNodeScreen> {
             //Add node on double tap
             onDoubleTapDown: (details) {
               setState(() {
-                var position = details.localPosition;
+                Offset position = details.localPosition;
                 positions.add([position.dx-50, position.dy-50]);
               });
             },
@@ -123,42 +140,27 @@ class _MovableNodeScreenState extends State<MovableNodeScreen> {
               //Select which nodes is dragged
               onPanStart: (details) {
                 resetSelected();
-                var position = details.localPosition;
-                var y = position.dy - 50;
-                var x = position.dx - 50;
-                for (int i = 0; i < positions.length; i++) {
-                  if (nodes[i].containsPoint(x, y)) {
-                    selectedIndex = i;
-                    break;
-                  }
-                }
+                Offset position = details.localPosition;
+                selectedIndex = _selectIndex(position);
               },
               //Deselect when stopped dragging
               onPanEnd: (details) {
                 if (lineMode) {
-                  var position = details.localPosition;
-                  var y = position.dy - 50;
-                  var x = position.dx - 50;
-                  for (int i = 0; i < positions.length; i++) {
-                    if (nodes[i].containsPoint(x, y)) {
-                      selectedIndex2 = i;
-                      break;
-                    }
+                  Offset position = details.localPosition;
+                  selectedIndex2 = _selectIndex(position);
                   }
                   if (selectedIndex != -1 && selectedIndex2 != -1) {
                     lineIndices.add([selectedIndex, selectedIndex2]);
                     setState(() {});
                   }
-                }
-                //resetSelected();
-              },
+                },
               //Drag node
               onPanUpdate: (details) {
                 if (selectedIndex != -1 && !lineMode) {
                   positions[selectedIndex][0] += details.delta.dx;
                   positions[selectedIndex][1] += details.delta.dy;
+                  setState(() {});
                 }
-                setState(() {});
               },
             ),
           ),

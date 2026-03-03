@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import "dart:math";
 
 class Node extends StatefulWidget {
-  final double top;
-  final double left;
+  final Offset position;
 
   const Node({
     super.key,
-    required this.top,
-    required this.left
+    required this.position,
   });
 
   bool containsPoint(double x, double y) {
-    if (pow(x - left, 2) + pow(y - top, 2) < pow(50, 2)) {
+    if (pow(x - position.dx, 2) + pow(y - position.dy, 2) < pow(50, 2)) {
       return true;
     } else {
       return false;
@@ -24,8 +22,6 @@ class Node extends StatefulWidget {
 }
 
 class _NodeState extends State<Node> {
-  //late double top = widget.top;
-  //late double left = widget.left;
   late Color borderColor = Colors.black;
   final FocusNode focusNode = FocusNode();
 
@@ -72,8 +68,8 @@ class _NodeState extends State<Node> {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: widget.top,
-      left: widget.left,
+      top: widget.position.dy,
+      left: widget.position.dx,
       child: Container(
         width: 100,
         height: 100,
